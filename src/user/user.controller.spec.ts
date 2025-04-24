@@ -1,16 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { of } from 'rxjs';
 
-// Mock the module with the typo before importing the controller
-jest.mock('src/config/sercices', () => ({
+// Mock the services config before importing the controller
+jest.doMock('src/config/sercices', () => ({
   NATS_SERVICE: 'NATS_SERVICE',
 }));
 
-// Now import the controller which depends on the mocked module
-import { AuthController } from './auth.controller';
+import { UserController } from './user.controller';
 
-describe('AuthController', () => {
-  let controller: AuthController;
+describe('UserController', () => {
+  let controller: UserController;
 
   // Create a mock for the ClientProxy
   const mockClientProxy = {
@@ -22,7 +21,7 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AuthController],
+      controllers: [UserController],
       providers: [
         {
           provide: 'NATS_SERVICE',
@@ -31,7 +30,7 @@ describe('AuthController', () => {
       ],
     }).compile();
 
-    controller = module.get<AuthController>(AuthController);
+    controller = module.get<UserController>(UserController);
   });
 
   it('should be defined', () => {
