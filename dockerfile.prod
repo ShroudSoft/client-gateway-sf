@@ -1,4 +1,3 @@
-
 #DependenciaS
 FROM node:alpine AS deps
 
@@ -24,9 +23,8 @@ COPY . .
 
 RUN npm run build
 
-ENV HUSKY_SKIP_INSTALL=true
 
-RUN npm ci -f --only=production && npm cache clean --force
+RUN npm install --production && npm cache clean --force
 
 
 
