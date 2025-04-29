@@ -9,27 +9,30 @@ import {
   Inject,
   UseGuards,
 } from '@nestjs/common';
-import { CreateBusinessDto } from './dto/create-business.dto';
-import { UpdateBusinessDto } from './dto/update-business.dto';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { CreateBusinessUserDto } from './dto/create-business-user.dto';
+import { UpdateBusinessUserDto } from './dto/update-business-user.dto';
 import { NATS_SERVICE } from 'src/config/sercices';
-import { catchError } from 'rxjs';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Token } from 'src/auth/decorators/token.decorator';
+import { catchError } from 'rxjs';
 
-@Controller('business')
+@Controller('business-user')
 @UseGuards(AuthGuard)
 @ApiBearerAuth('JWT-auth')
-export class BusinessController {
+export class BusinessUserController {
   constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
   @Post()
-  create(@Body() createBusinessDto: CreateBusinessDto, @Token() token: string) {
+  create(
+    @Body() createBusinessUserDto: CreateBusinessUserDto,
+    @Token() token: string,
+  ) {
     return this.client
-      .send('business.createBusiness', {
+      .send('business.user.create', {
         Authorization: token,
-        Body: createBusinessDto,
+        Body: createBusinessUserDto,
       })
       .pipe(
         catchError((error) => {
@@ -39,10 +42,10 @@ export class BusinessController {
   }
 
   @Get()
-  findAll(@Token() authorization: string) {
+  findAll(@Token() token: string) {
     return this.client
-      .send('business.findAllBusiness', {
-        Authorization: authorization,
+      .send('business.user.findAll', {
+        Authorization: token,
       })
       .pipe(
         catchError((error) => {
@@ -52,10 +55,10 @@ export class BusinessController {
   }
 
   @Get(':id')
-  findOne(@Token() authorization: string, @Param('id') id: string) {
+  findOne(@Token() token: string, @Param('id') id: string) {
     return this.client
-      .send('business.findOneBusiness', {
-        Authorization: authorization,
+      .send('business.user.findOne', {
+        Authorization: token,
         Body: { id },
       })
       .pipe(
@@ -67,14 +70,14 @@ export class BusinessController {
 
   @Patch(':id')
   update(
-    @Token() authorization: string,
-    @Param('id') id: string,
-    @Body() updateBusinessDto: UpdateBusinessDto,
+    @Token() token: string,
+    @Param('id') businessId: string,
+    @Body() updateBusinessUserDto: UpdateBusinessUserDto,
   ) {
     return this.client
-      .send('business.updateBusiness', {
-        Authorization: authorization,
-        Body: { id, ...updateBusinessDto },
+      .send('business.user.update', {
+        Authorization: token,
+        Body: { ...updateBusinessUserDto, businessId },
       })
       .pipe(
         catchError((error) => {
@@ -84,10 +87,10 @@ export class BusinessController {
   }
 
   @Delete(':id')
-  remove(@Token() authorization: string, @Param('id') id: string) {
+  remove(@Token() token: string, @Param('id') id: string) {
     return this.client
-      .send('business.removeBusiness', {
-        Authorization: authorization,
+      .send('business.user.remove', {
+        Authorization: token,
         Body: { id },
       })
       .pipe(
