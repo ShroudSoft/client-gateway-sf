@@ -16,14 +16,25 @@ import { NATS_SERVICE } from 'src/config/sercices';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination.dto';
+import { CreateExamBsDto } from './dto/create-exam-bs.dto';
 
 @Controller('exam')
 export class ExamController {
   constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
-  @Post()
-  createExam(@Body() createExamDto: CreateExamDto) {
-    return this.client.send('exams.create.exam', createExamDto).pipe(
+  @Post('sf')
+  createExamSf(@Body() createExamDto: CreateExamDto) {
+    return this.client.send('exams.create-sf.exam', createExamDto).pipe(
+      catchError((error) => {
+        console.log(error);
+        throw new RpcException(error as object);
+      }),
+    );
+  }
+
+  @Post('bs')
+  createExamBs(@Body() createExamDto: CreateExamBsDto) {
+    return this.client.send('exams.create-bs.exam', createExamDto).pipe(
       catchError((error) => {
         console.log(error);
         throw new RpcException(error as object);

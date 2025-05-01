@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { number } from 'joi';
 
-export class CreateExamDto {
+export class CreateExamBsDto {
   @ApiProperty({
     description: 'Title of the exam',
     example: 'Examen #1',
@@ -35,6 +35,14 @@ export class CreateExamDto {
   @IsNumber()
   @IsNotEmpty()
   readonly nextAttInHours: number;
+
+  @ApiPropertyOptional({
+    description: 'Optional business_id if the exam was made by a business',
+    example: null,
+  })
+  @IsString()
+  @IsNotEmpty()
+  business_id: string;
 
   @ApiProperty({
     description: 'List of the modules_id included in the exam',

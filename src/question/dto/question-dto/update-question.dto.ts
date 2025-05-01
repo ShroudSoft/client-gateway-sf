@@ -1,8 +1,6 @@
 import {
   IsOptional,
   IsString,
-  IsNotEmpty,
-  IsBoolean,
   IsArray,
   ArrayMinSize,
   ArrayMaxSize,
@@ -10,17 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-
-class UpdateOptionDto {
-  @ApiPropertyOptional({ example: 'Option B' })
-  @IsString()
-  @IsNotEmpty()
-  text: string;
-
-  @ApiPropertyOptional({ example: false })
-  @IsBoolean()
-  isCorrect: boolean;
-}
+import { UpdateOptionDto } from '../option-dto/update-option.dto';
 
 export class UpdateQuestionDto {
   @ApiPropertyOptional({ example: 'Updated question' })
