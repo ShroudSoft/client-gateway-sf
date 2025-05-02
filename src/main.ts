@@ -25,6 +25,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('SellFlix API')
     .setVersion('1.0')
+    .setDescription('By ShroudSoft')
     .addBearerAuth(
       {
         type: 'http',
