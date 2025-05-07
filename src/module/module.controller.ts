@@ -9,6 +9,7 @@ import {
   Inject,
   Query,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
@@ -17,7 +18,9 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination.dto';
 import { CreateModuleBsDto } from './dto/create-module-bs.dto';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Token } from 'src/auth/decorators/token.decorator';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @Controller('module')
 export class ModuleController {
@@ -28,12 +31,22 @@ export class ModuleController {
     description:
       'Este endpoint es para examenes exclusivamente creados por SellFlix',
   })
-  createModuleSf(@Body() createModuleDto: CreateModuleDto) {
-    return this.client.send('exams.create-sf.module', createModuleDto).pipe(
-      catchError((error) => {
-        throw new RpcException(error as object);
-      }),
-    );
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  createModuleSf(
+    @Body() createModuleDto: CreateModuleDto,
+    @Token() token: string,
+  ) {
+    return this.client
+      .send('exams.create-sf.module', {
+        Authorization: token,
+        Body: createModuleDto,
+      })
+      .pipe(
+        catchError((error) => {
+          throw new RpcException(error as object);
+        }),
+      );
   }
 
   @Post('bs')

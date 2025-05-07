@@ -9,6 +9,7 @@ import {
   Inject,
   Query,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { UpdateExamDto } from './dto/update-exam.dto';
@@ -17,19 +18,29 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination.dto';
 import { CreateExamBsDto } from './dto/create-exam-bs.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { Token } from 'src/auth/decorators/token.decorator';
 
 @Controller('exam')
 export class ExamController {
   constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
   @Post('sf')
-  createExamSf(@Body() createExamDto: CreateExamDto) {
-    return this.client.send('exams.create-sf.exam', createExamDto).pipe(
-      catchError((error) => {
-        console.log(error);
-        throw new RpcException(error as object);
-      }),
-    );
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  createExamSf(@Body() createExamDto: CreateExamDto, @Token() token: string) {
+    return this.client
+      .send('exams.create-sf.exam', {
+        Authorization: token,
+        Body: createExamDto,
+      })
+      .pipe(
+        catchError((error) => {
+          console.log(error);
+          throw new RpcException(error as object);
+        }),
+      );
   }
 
   @Post('bs')
