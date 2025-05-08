@@ -17,10 +17,10 @@ import { NATS_SERVICE } from 'src/config/sercices';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination.dto';
-import { CreateExamBsDto } from './dto/create-exam-bs.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Token } from 'src/auth/decorators/token.decorator';
+import { User } from 'src/auth/decorators/user.decorator';
 
 @Controller('exam')
 export class ExamController {
@@ -44,13 +44,17 @@ export class ExamController {
   }
 
   @Post('bs')
-  createExamBs(@Body() createExamDto: CreateExamBsDto) {
-    return this.client.send('exams.create-bs.exam', createExamDto).pipe(
-      catchError((error) => {
-        console.log(error);
-        throw new RpcException(error as object);
-      }),
-    );
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  createExamBs(@Body() createExamDto: CreateExamDto, @User() user: string) {
+    return this.client
+      .send('exams.create-bs.exam', { Id: user, Body: createExamDto })
+      .pipe(
+        catchError((error) => {
+          console.log(error);
+          throw new RpcException(error as object);
+        }),
+      );
   }
 
   @Get()

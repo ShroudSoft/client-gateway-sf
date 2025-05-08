@@ -17,10 +17,10 @@ import { NATS_SERVICE } from 'src/config/sercices';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination.dto';
-import { CreateModuleBsDto } from './dto/create-module-bs.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Token } from 'src/auth/decorators/token.decorator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { User } from 'src/auth/decorators/user.decorator';
 
 @Controller('module')
 export class ModuleController {
@@ -29,7 +29,7 @@ export class ModuleController {
   @Post('sf')
   @ApiOperation({
     description:
-      'Este endpoint es para examenes exclusivamente creados por SellFlix',
+      'Este endpoint es para modulos exclusivamente creados por SellFlix',
   })
   @UseGuards(AuthGuard)
   @ApiBearerAuth('JWT-auth')
@@ -50,16 +50,22 @@ export class ModuleController {
   }
 
   @Post('bs')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
-    description:
-      'Este endpoint es para examenes creados por businesses, se requiere un business_id',
+    description: 'Este endpoint es para modulos creados por businesses',
   })
-  createModuleBs(@Body() createModuleDto: CreateModuleBsDto) {
-    return this.client.send('exams.create-bs.module', createModuleDto).pipe(
-      catchError((error) => {
-        throw new RpcException(error as object);
-      }),
-    );
+  createModuleBs(
+    @Body() createModuleDto: CreateModuleDto,
+    @User() user: string,
+  ) {
+    return this.client
+      .send('exams.create-bs.module', { Id: user, Body: createModuleDto })
+      .pipe(
+        catchError((error) => {
+          throw new RpcException(error as object);
+        }),
+      );
   }
 
   @Get()
